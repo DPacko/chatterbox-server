@@ -1,3 +1,5 @@
+var url = require('url');
+
 var messages = require('./messages');
 /*************************************************************
 
@@ -40,24 +42,42 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain'; //JSON?
+  headers['Content-Type'] = 'application/json'; //JSON?
 
   // console.log(request, "---------------------", response);
 
   if (request.method === 'GET') {
-    statusCode = 200;
-    response.writeHead(statusCode, headers);
-    // response.write(JSON.stringify({key:'value'}))
-    console.log('GOT GET REQUEST SUCH WOW', response.statusCode);
-    response.end(JSON.stringify({'results': []}));
-  } else if(request.method === 'POST') {
+    var pathname = url.parse(request.url).pathname;
+    // console.log(pathname);
+    if (pathname !== '/classes/messages') {
+      statusCode = 404;
+      response.writeHead(statusCode, headers);
+      response.end('NOTHING HERE');
+    } else {
+      statusCode = 200;
+      response.writeHead(statusCode, headers);
+      // response.write(JSON.stringify({key:'value'}))
+      // console.log('GOT GET REQUEST SUCH WOW', response.statusCode);
+      response.end(JSON.stringify(messages.messages));
+    }
+   }
+
+  if (request.method === 'POST') {
     statusCode = 201;
-    console.log('POST');
+    // console.log('REQUEST ----------------');
+    request.on('data', (chunk) => {
+      messages.messages.results.push(JSON.parse(chunk));
+    });
+    // console.log(request);
+    // console.log('POST');
+    var pathname = url.parse(request.url).pathname;
+    // console.log("Request for " + pathname + " received.");
     response.writeHead(statusCode, headers);
 
     // messages.results.push(JSON.parse(request._postData));
     // console.log('THIS WENT IN', messages.results);
     response.end();
+
   }
 
   // response.write('test');

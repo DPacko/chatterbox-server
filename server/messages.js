@@ -1,5 +1,5 @@
 var messages = {
-  results : [{'username': 'Thomas', 'text': 'everybody\'s gone serving, server USA'}]
+  results : []
 };
 
-exports.messages = messages;
+exports.messages = messages

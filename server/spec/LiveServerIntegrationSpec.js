@@ -73,5 +73,39 @@ describe('server', function() {
     });
   });
 
+//Additional Tests
+
+  it('should accept an array of objects to /classes/messages', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: [{
+        username: 'Jono',
+        text: 'Do my bidding!'},{
+        username: 'Bob Loblaw',
+        text: 'Do my bidding!'}]
+    };
+
+    request(requestParams, function(error, response, body) {
+      var messages = JSON.parse(body).results;
+      expect(messages[0].length).to.equal(2);
+      expect(messages[0][0].text).to.equal('Do my bidding!');
+      done();
+    });
+  });
+
+  it('Should 404 when asked for a nonexistent endpoint', function(done) {
+    request('http://127.0.0.1:3000/arglebargle', function(error, response, body) {
+      expect(response.statusCode).to.equal(404);
+      done();
+    });
+  });
+
+  it('Should 404 when asked for a nonexistent endpoint', function(done) {
+    request('http://127.0.0.1:3000/arglebargle', function(error, response, body) {
+      expect(response.statusCode).to.equal(404);
+      done();
+    });
+  });
+
 
 });

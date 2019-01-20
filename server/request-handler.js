@@ -44,54 +44,69 @@ var requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json'; //JSON?
 
-  // console.log(request, "---------------------", response);
+  var testMessage = [
+    {
+      'username': 'dawn',
+      'text': 'im such a good coder'
+    }
+  ];
+
+  var sendResponse = function (response, data, statusCode) {
+    statusCode = statusCode || 200;
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(data));
+  };
+
+  var collectData = function (request, callback) {
+    var data = '';
+    request.on('data', (chunk) => {
+      data += chunk;
+    });
+    request.on('end', () => {
+      callback(JSON.parse(data));
+    });
+  }
+
+  if (request.method === 'OPTIONS') {
+    statusCode = 200;
+    sendResponse(response, null, statusCode);
+    //response.writeHead(statusCode, headers);
+    //response.end(JSON.stringify(messages.messages));
+   }
 
   if (request.method === 'GET') {
     var pathname = url.parse(request.url).pathname;
-    // console.log(pathname);
-    if (pathname !== '/classes/messages') {
-      statusCode = 404;
-      response.writeHead(statusCode, headers);
-      response.end('NOTHING HERE');
+    if (pathname === '/classes/messages') {
+      sendResponse(response, {results: testMessage});
+      //response.writeHead(statusCode, headers);
+      //response.end(JSON.stringify({results: testMessage}));
+    } else if (pathname === '/teapot') {
+      statusCode = 418;
+      sendResponse(response, 'IM A TEAPOT', statusCode);
+      //response.writeHead(statusCode, headers);
+      //response.end('IM A TEAPOT');
     } else {
-      statusCode = 200;
-      response.writeHead(statusCode, headers);
-      // response.write(JSON.stringify({key:'value'}))
-      // console.log('GOT GET REQUEST SUCH WOW', response.statusCode);
-      response.end(JSON.stringify(messages.messages));
+      statusCode = 404;
+      sendResponse(response, 'NOTHING HERE', statusCode);
+      //response.writeHead(statusCode, headers);
+      //response.end(JSON.stringify('NOTHING HERE'));
     }
    }
 
   if (request.method === 'POST') {
-    statusCode = 201;
-    // console.log('REQUEST ----------------');
-    request.on('data', (chunk) => {
-      messages.messages.results.push(JSON.parse(chunk));
-    });
-    // console.log(request);
-    // console.log('POST');
     var pathname = url.parse(request.url).pathname;
-    // console.log("Request for " + pathname + " received.");
-    response.writeHead(statusCode, headers);
 
-    // messages.results.push(JSON.parse(request._postData));
-    // console.log('THIS WENT IN', messages.results);
-    response.end();
+    collectData(request, function(message) {
+      testMessage.push(message);
+      console.log(testMessage);
+      statusCode = 201;
+      sendResponse(response, {objectID: 1}, statusCode);
+    });
 
+    console.log('POSTED', messages.messages.results)
+    //response.writeHead(statusCode, headers);
+    //response.end();
   }
-
-  // response.write('test');
-
-//   request.on('response', function (response) {
-//   var body = '';
-//   response.on('data', function (chunk) {
-//     body += chunk;
-//   });
-//   response.on('end', function () {
-//     console.log('BODY: ' + body);
-//   });
-// });
-// request.end();
 
 
   // .writeHead() writes to the request line and headers of the response,

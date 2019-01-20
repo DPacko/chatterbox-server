@@ -1,5 +1,4 @@
 var url = require('url');
-
 var messages = require('./messages');
 /*************************************************************
 
@@ -42,14 +41,7 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json'; //JSON?
-
-  var testMessage = [
-    {
-      'username': 'dawn',
-      'text': 'im such a good coder'
-    }
-  ];
+  headers['Content-Type'] = 'application/json';
 
   var sendResponse = function (response, data, statusCode) {
     statusCode = statusCode || 200;
@@ -70,42 +62,40 @@ var requestHandler = function(request, response) {
   if (request.method === 'OPTIONS') {
     statusCode = 200;
     sendResponse(response, null, statusCode);
-    //response.writeHead(statusCode, headers);
-    //response.end(JSON.stringify(messages.messages));
    }
 
   if (request.method === 'GET') {
     var pathname = url.parse(request.url).pathname;
     if (pathname === '/classes/messages') {
-      sendResponse(response, {results: testMessage});
-      //response.writeHead(statusCode, headers);
-      //response.end(JSON.stringify({results: testMessage}));
+      sendResponse(response, messages.messages);
     } else if (pathname === '/teapot') {
       statusCode = 418;
       sendResponse(response, 'IM A TEAPOT', statusCode);
-      //response.writeHead(statusCode, headers);
-      //response.end('IM A TEAPOT');
     } else {
       statusCode = 404;
       sendResponse(response, 'NOTHING HERE', statusCode);
-      //response.writeHead(statusCode, headers);
-      //response.end(JSON.stringify('NOTHING HERE'));
     }
    }
+
 
   if (request.method === 'POST') {
     var pathname = url.parse(request.url).pathname;
 
-    collectData(request, function(message) {
-      testMessage.push(message);
-      console.log(testMessage);
-      statusCode = 201;
-      sendResponse(response, {objectID: 1}, statusCode);
-    });
+    if (pathname === '/classes/messages') {
+      collectData(request, function(message) {
+        message.objectId = ++messages.objectId;
+        messages.messages.results.push(message);
+        console.log(messages.messages.results);
+        statusCode = 201;
+        sendResponse(response, {objectId: messages.objectId}, statusCode);
+      });
 
-    console.log('POSTED', messages.messages.results)
-    //response.writeHead(statusCode, headers);
-    //response.end();
+    } else {
+      statusCode = 404;
+      sendResponse(response, '404 DIDNT GO IN', statusCode);
+    }
+
+
   }
 
 

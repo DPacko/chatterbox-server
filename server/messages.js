@@ -1,5 +1,15 @@
 var messages = {
-  results : []
+  results : [
+    {
+      "username": "thomas",
+      "text": "hey",
+      "roomname": "cool room",
+      "objectId": 0
+    }
+  ]
 };
 
-exports.messages = messages
+var objectId = 1;
+
+exports.messages = messages;
+exports.objectId = objectId;
